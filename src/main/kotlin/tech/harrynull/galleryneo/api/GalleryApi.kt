@@ -55,7 +55,7 @@ class GalleryApi(
         MediaType.IMAGE_GIF_VALUE,
         MediaType.IMAGE_PNG_VALUE
     ])
-    fun getImage(@PathVariable id: String, response: HttpServletResponse): ResponseEntity<ByteArray> {
+    fun getImage(@PathVariable id: String): ResponseEntity<ByteArray> {
         // try to interpret it as SHA 256 (store id) first.
         val image = imageStore.readImage(id)
         if (image != null) return ResponseEntity.ok(image)

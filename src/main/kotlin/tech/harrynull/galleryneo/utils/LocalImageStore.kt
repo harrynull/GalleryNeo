@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import java.io.FileInputStream
 import java.nio.file.Path
 import java.security.MessageDigest
+import kotlin.io.path.deleteExisting
 
 // Well this should have been in a config file/env.
 // But really, in prod, it should be a CDN/file storage service (e.g. Amazon S3)
@@ -39,8 +40,9 @@ class LocalImageStore : ImageStore {
     override fun readImage(storeId: String): ByteArray? {
         if (idRegexPattern.matchEntire(storeId) == null) return null
 
-        return kotlin.runCatching { FileInputStream(imageStorePath.resolve(storeId).toFile()).readAllBytes() }
-            .getOrNull()
+        return kotlin.runCatching {
+            FileInputStream(imageStorePath.resolve(storeId).toFile()).use { it.readAllBytes() }
+        }.getOrNull()
     }
 
     override fun deleteImage(storeId: String) {

@@ -9,6 +9,7 @@ It implements the following features:
 3. Delete images, handled securely
 4. Image permissions (private vs. public images).
 5. Elegant, efficient and easy-to-maintain code.
+6. Comprehensive tests
 
 Written with Kotlin, Springboot, MySQL, protobuf
 
