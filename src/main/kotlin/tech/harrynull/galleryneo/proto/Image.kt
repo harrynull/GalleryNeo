@@ -37,7 +37,7 @@ class Image(
     tag = 3,
     adapter = "com.squareup.wire.ProtoAdapter#STRING"
   )
-  val url: String? = null,
+  val id: String? = null,
   @field:WireField(
     tag = 4,
     adapter = "com.squareup.wire.ProtoAdapter#UINT64"
@@ -57,7 +57,7 @@ class Image(
     return unknownFields == other.unknownFields
         && description == other.description
         && uploaderName == other.uploaderName
-        && url == other.url
+        && id == other.id
         && timeUploadedMillis == other.timeUploadedMillis
   }
 
@@ -67,7 +67,7 @@ class Image(
       result = unknownFields.hashCode()
       result = result * 37 + description.hashCode()
       result = result * 37 + uploaderName.hashCode()
-      result = result * 37 + url.hashCode()
+      result = result * 37 + id.hashCode()
       result = result * 37 + timeUploadedMillis.hashCode()
       super.hashCode = result
     }
@@ -78,7 +78,7 @@ class Image(
     val result = mutableListOf<String>()
     if (description != null) result += """description=${sanitize(description)}"""
     if (uploaderName != null) result += """uploaderName=${sanitize(uploaderName)}"""
-    if (url != null) result += """url=${sanitize(url)}"""
+    if (id != null) result += """id=${sanitize(id)}"""
     if (timeUploadedMillis != null) result += """timeUploadedMillis=$timeUploadedMillis"""
     return result.joinToString(prefix = "Image{", separator = ", ", postfix = "}")
   }
@@ -86,10 +86,10 @@ class Image(
   fun copy(
     description: String? = this.description,
     uploaderName: String? = this.uploaderName,
-    url: String? = this.url,
+    id: String? = this.id,
     timeUploadedMillis: Long? = this.timeUploadedMillis,
     unknownFields: ByteString = this.unknownFields
-  ): Image = Image(description, uploaderName, url, timeUploadedMillis, unknownFields)
+  ): Image = Image(description, uploaderName, id, timeUploadedMillis, unknownFields)
 
   companion object {
     @JvmField
@@ -101,14 +101,14 @@ class Image(
       override fun encodedSize(value: Image): Int = 
         ProtoAdapter.STRING.encodedSizeWithTag(1, value.description) +
         ProtoAdapter.STRING.encodedSizeWithTag(2, value.uploaderName) +
-        ProtoAdapter.STRING.encodedSizeWithTag(3, value.url) +
+        ProtoAdapter.STRING.encodedSizeWithTag(3, value.id) +
         ProtoAdapter.UINT64.encodedSizeWithTag(4, value.timeUploadedMillis) +
         value.unknownFields.size
 
       override fun encode(writer: ProtoWriter, value: Image) {
         ProtoAdapter.STRING.encodeWithTag(writer, 1, value.description)
         ProtoAdapter.STRING.encodeWithTag(writer, 2, value.uploaderName)
-        ProtoAdapter.STRING.encodeWithTag(writer, 3, value.url)
+        ProtoAdapter.STRING.encodeWithTag(writer, 3, value.id)
         ProtoAdapter.UINT64.encodeWithTag(writer, 4, value.timeUploadedMillis)
         writer.writeBytes(value.unknownFields)
       }
@@ -116,13 +116,13 @@ class Image(
       override fun decode(reader: ProtoReader): Image {
         var description: String? = null
         var uploaderName: String? = null
-        var url: String? = null
+        var id: String? = null
         var timeUploadedMillis: Long? = null
         val unknownFields = reader.forEachTag { tag ->
           when (tag) {
             1 -> description = ProtoAdapter.STRING.decode(reader)
             2 -> uploaderName = ProtoAdapter.STRING.decode(reader)
-            3 -> url = ProtoAdapter.STRING.decode(reader)
+            3 -> id = ProtoAdapter.STRING.decode(reader)
             4 -> timeUploadedMillis = ProtoAdapter.UINT64.decode(reader)
             else -> reader.readUnknownField(tag)
           }
@@ -130,7 +130,7 @@ class Image(
         return Image(
           description = description,
           uploaderName = uploaderName,
-          url = url,
+          id = id,
           timeUploadedMillis = timeUploadedMillis,
           unknownFields = unknownFields
         )

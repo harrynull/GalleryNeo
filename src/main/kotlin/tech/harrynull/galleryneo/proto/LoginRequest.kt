@@ -26,7 +26,7 @@ class LoginRequest(
     tag = 1,
     adapter = "com.squareup.wire.ProtoAdapter#STRING"
   )
-  val email: String? = null,
+  val name: String? = null,
   @field:WireField(
     tag = 2,
     adapter = "com.squareup.wire.ProtoAdapter#STRING"
@@ -44,7 +44,7 @@ class LoginRequest(
     if (other === this) return true
     if (other !is LoginRequest) return false
     return unknownFields == other.unknownFields
-        && email == other.email
+        && name == other.name
         && password == other.password
   }
 
@@ -52,7 +52,7 @@ class LoginRequest(
     var result = super.hashCode
     if (result == 0) {
       result = unknownFields.hashCode()
-      result = result * 37 + email.hashCode()
+      result = result * 37 + name.hashCode()
       result = result * 37 + password.hashCode()
       super.hashCode = result
     }
@@ -61,16 +61,16 @@ class LoginRequest(
 
   override fun toString(): String {
     val result = mutableListOf<String>()
-    if (email != null) result += """email=${sanitize(email)}"""
+    if (name != null) result += """name=${sanitize(name)}"""
     if (password != null) result += """password=${sanitize(password)}"""
     return result.joinToString(prefix = "LoginRequest{", separator = ", ", postfix = "}")
   }
 
   fun copy(
-    email: String? = this.email,
+    name: String? = this.name,
     password: String? = this.password,
     unknownFields: ByteString = this.unknownFields
-  ): LoginRequest = LoginRequest(email, password, unknownFields)
+  ): LoginRequest = LoginRequest(name, password, unknownFields)
 
   companion object {
     @JvmField
@@ -80,28 +80,28 @@ class LoginRequest(
       "type.googleapis.com/tech.harrynull.galleryneo.proto.LoginRequest"
     ) {
       override fun encodedSize(value: LoginRequest): Int = 
-        ProtoAdapter.STRING.encodedSizeWithTag(1, value.email) +
+        ProtoAdapter.STRING.encodedSizeWithTag(1, value.name) +
         ProtoAdapter.STRING.encodedSizeWithTag(2, value.password) +
         value.unknownFields.size
 
       override fun encode(writer: ProtoWriter, value: LoginRequest) {
-        ProtoAdapter.STRING.encodeWithTag(writer, 1, value.email)
+        ProtoAdapter.STRING.encodeWithTag(writer, 1, value.name)
         ProtoAdapter.STRING.encodeWithTag(writer, 2, value.password)
         writer.writeBytes(value.unknownFields)
       }
 
       override fun decode(reader: ProtoReader): LoginRequest {
-        var email: String? = null
+        var name: String? = null
         var password: String? = null
         val unknownFields = reader.forEachTag { tag ->
           when (tag) {
-            1 -> email = ProtoAdapter.STRING.decode(reader)
+            1 -> name = ProtoAdapter.STRING.decode(reader)
             2 -> password = ProtoAdapter.STRING.decode(reader)
             else -> reader.readUnknownField(tag)
           }
         }
         return LoginRequest(
-          email = email,
+          name = name,
           password = password,
           unknownFields = unknownFields
         )

@@ -1,14 +1,14 @@
 package tech.harrynull.galleryneo.persistence
 
 import tech.harrynull.galleryneo.proto.Image
-import tech.harrynull.galleryneo.proto.User
+import tech.harrynull.galleryneo.utils.ImageStore
 import javax.persistence.*
 
 @Entity(name = "image")
 @Table(
     name = "images", indexes = [
-    Index(name = "idx_imageName", columnList = "imageName", unique = false),
-    Index(name = "idx_uploader", columnList = "uploader_id", unique = true),
+    Index(name = "idx_imageId", columnList = "imageId"),
+    Index(name = "idx_uploader", columnList = "uploader_id"),
 ]
 )
 data class DbImage(
@@ -16,7 +16,7 @@ data class DbImage(
     var description: String,
 
     @Column
-    var imageName: String,
+    var imageId: String, // hash of the image
 
     @Column
     var timeUploadedMillis: Long,
@@ -30,9 +30,26 @@ data class DbImage(
     fun toProto(): Image {
         return Image(
             description = description,
-            url = "/$imageName",
+            id = imageId,
             uploaderName = uploader.name,
             timeUploadedMillis = timeUploadedMillis,
         )
+    }
+
+    companion object {
+        // the caller is responsible for store the db object
+        fun create(
+            content: ByteArray,
+            description: String?,
+            uploader: DbUser,
+            imageStore: ImageStore,
+        ): DbImage {
+            return DbImage(
+                uploader = uploader,
+                description = description ?: "",
+                imageId = imageStore.storeImage(content),
+                timeUploadedMillis = System.currentTimeMillis(),
+            )
+        }
     }
 }

@@ -26,14 +26,9 @@ class RegisterRequest(
     tag = 1,
     adapter = "com.squareup.wire.ProtoAdapter#STRING"
   )
-  val email: String? = null,
-  @field:WireField(
-    tag = 2,
-    adapter = "com.squareup.wire.ProtoAdapter#STRING"
-  )
   val name: String? = null,
   @field:WireField(
-    tag = 3,
+    tag = 2,
     adapter = "com.squareup.wire.ProtoAdapter#STRING"
   )
   val password: String? = null,
@@ -49,7 +44,6 @@ class RegisterRequest(
     if (other === this) return true
     if (other !is RegisterRequest) return false
     return unknownFields == other.unknownFields
-        && email == other.email
         && name == other.name
         && password == other.password
   }
@@ -58,7 +52,6 @@ class RegisterRequest(
     var result = super.hashCode
     if (result == 0) {
       result = unknownFields.hashCode()
-      result = result * 37 + email.hashCode()
       result = result * 37 + name.hashCode()
       result = result * 37 + password.hashCode()
       super.hashCode = result
@@ -68,18 +61,16 @@ class RegisterRequest(
 
   override fun toString(): String {
     val result = mutableListOf<String>()
-    if (email != null) result += """email=${sanitize(email)}"""
     if (name != null) result += """name=${sanitize(name)}"""
     if (password != null) result += """password=${sanitize(password)}"""
     return result.joinToString(prefix = "RegisterRequest{", separator = ", ", postfix = "}")
   }
 
   fun copy(
-    email: String? = this.email,
     name: String? = this.name,
     password: String? = this.password,
     unknownFields: ByteString = this.unknownFields
-  ): RegisterRequest = RegisterRequest(email, name, password, unknownFields)
+  ): RegisterRequest = RegisterRequest(name, password, unknownFields)
 
   companion object {
     @JvmField
@@ -89,32 +80,27 @@ class RegisterRequest(
       "type.googleapis.com/tech.harrynull.galleryneo.proto.RegisterRequest"
     ) {
       override fun encodedSize(value: RegisterRequest): Int = 
-        ProtoAdapter.STRING.encodedSizeWithTag(1, value.email) +
-        ProtoAdapter.STRING.encodedSizeWithTag(2, value.name) +
-        ProtoAdapter.STRING.encodedSizeWithTag(3, value.password) +
+        ProtoAdapter.STRING.encodedSizeWithTag(1, value.name) +
+        ProtoAdapter.STRING.encodedSizeWithTag(2, value.password) +
         value.unknownFields.size
 
       override fun encode(writer: ProtoWriter, value: RegisterRequest) {
-        ProtoAdapter.STRING.encodeWithTag(writer, 1, value.email)
-        ProtoAdapter.STRING.encodeWithTag(writer, 2, value.name)
-        ProtoAdapter.STRING.encodeWithTag(writer, 3, value.password)
+        ProtoAdapter.STRING.encodeWithTag(writer, 1, value.name)
+        ProtoAdapter.STRING.encodeWithTag(writer, 2, value.password)
         writer.writeBytes(value.unknownFields)
       }
 
       override fun decode(reader: ProtoReader): RegisterRequest {
-        var email: String? = null
         var name: String? = null
         var password: String? = null
         val unknownFields = reader.forEachTag { tag ->
           when (tag) {
-            1 -> email = ProtoAdapter.STRING.decode(reader)
-            2 -> name = ProtoAdapter.STRING.decode(reader)
-            3 -> password = ProtoAdapter.STRING.decode(reader)
+            1 -> name = ProtoAdapter.STRING.decode(reader)
+            2 -> password = ProtoAdapter.STRING.decode(reader)
             else -> reader.readUnknownField(tag)
           }
         }
         return RegisterRequest(
-          email = email,
           name = name,
           password = password,
           unknownFields = unknownFields

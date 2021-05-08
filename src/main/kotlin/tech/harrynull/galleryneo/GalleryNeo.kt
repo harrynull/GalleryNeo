@@ -13,22 +13,7 @@ import org.springframework.data.redis.serializer.GenericToStringSerializer
 
 @SpringBootApplication
 @EnableCaching
-class GalleryNeo(private val redisProperties: RedisProperties) {
-    @Bean
-    fun lettuceConnectionFactory() =
-        LettuceConnectionFactory(RedisStandaloneConfiguration(redisProperties.host, redisProperties.port))
-
-    @Bean
-    fun redisTemplate(): RedisTemplate<String, Any>? {
-        val template = RedisTemplate<String, Any>()
-        template.setConnectionFactory(lettuceConnectionFactory())
-        template.valueSerializer = GenericToStringSerializer(Any::class.java)
-        return template
-    }
-
-    @Bean
-    fun cacheManager() = RedisCacheManager.builder(lettuceConnectionFactory()).build()
-}
+class GalleryNeo
 
 fun main(args: Array<String>) {
     runApplication<GalleryNeo>(*args)

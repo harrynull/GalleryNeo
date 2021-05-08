@@ -2,6 +2,15 @@
 
 Your favorite good ol' Shopify Code Challenge now comes in Kotlin!
 
+It implements the following features:
+1. User registration, login with passwords securely hashed with [agon2](https://en.wikipedia.org/wiki/Argon2).
+    1. comes with a session manager!
+2. Upload images, handled securely (I know how vulnerable it could have been when doing CTF competitions).
+3. Delete images, handled securely
+4. Image permissions (private vs. public images).
+5. bulk image upload/deletion
+6. Elegant, efficient and easy-to-maintain code.
+
 Written with Kotlin, Springboot, MySQL, protobuf
 
 ## Deployment/Development
