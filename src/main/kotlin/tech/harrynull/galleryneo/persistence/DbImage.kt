@@ -24,6 +24,9 @@ data class DbImage(
     @OneToOne(fetch = FetchType.EAGER) @JoinColumn
     var uploader: DbUser,
 
+    @Column
+    var permission: Image.Permission,
+
     @Id @GeneratedValue
     var id: Long? = null
 ) {
@@ -34,6 +37,7 @@ data class DbImage(
             id = id,
             uploaderName = uploader.name,
             timeUploadedMillis = timeUploadedMillis,
+            permission = permission,
         )
     }
 
@@ -44,12 +48,14 @@ data class DbImage(
             description: String?,
             uploader: DbUser,
             imageStore: ImageStore,
+            permission: Image.Permission,
         ): DbImage {
             return DbImage(
                 uploader = uploader,
                 description = description ?: "",
                 storeId = imageStore.storeImage(content),
                 timeUploadedMillis = System.currentTimeMillis(),
+                permission = permission,
             )
         }
     }

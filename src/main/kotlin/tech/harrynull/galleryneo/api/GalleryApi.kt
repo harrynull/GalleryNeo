@@ -27,7 +27,15 @@ class GalleryApi(
         request: HttpServletRequest,
         @RequestParam("image") image: MultipartFile,
         @RequestParam("description") description: String?,
+        @RequestParam("permission") permission: Image.Permission?,
     ): UploadResult {
+        if (permission == null) {
+            return UploadResult(
+                isSuccessful = false,
+                failMessage = "You need to select a permission for the image"
+            )
+        }
+
         val user = sessionManager.getCurrentUser(request)
             ?: return UploadResult(
                 isSuccessful = false,
@@ -39,14 +47,20 @@ class GalleryApi(
             description = description,
             uploader = user,
             imageStore = imageStore,
+            permission = permission,
         ))
         return UploadResult(isSuccessful = true, image = dbImage.toProto())
     }
 
     @GetMapping("images/meta/{id}")
-    fun getImageMetaInfo(@PathVariable id: Long): Image? {
-        // TODO: check permission
-        return dbImageRepo.findByIdOrNull(id)?.toProto()
+    fun getImageMetaInfo(request: HttpServletRequest, @PathVariable id: Long): Image? {
+        val dbImage = dbImageRepo.findByIdOrNull(id) ?: return null
+
+        if (!hasPermissionToView(dbImage, request)) {
+            return null
+        }
+
+        return dbImage.toProto()
     }
 
     // it can use both store id (SHA 256) or image id (primary key)
@@ -55,15 +69,21 @@ class GalleryApi(
         MediaType.IMAGE_GIF_VALUE,
         MediaType.IMAGE_PNG_VALUE
     ])
-    fun getImage(@PathVariable id: String): ResponseEntity<ByteArray> {
+    fun getImage(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<ByteArray> {
         // try to interpret it as SHA 256 (store id) first.
+        // Note that accessing it by SHA 256 will deliberately bypass permission check.
+        // i.e. anyone who knows SHA 256 of the image can access it.
         val image = imageStore.readImage(id)
         if (image != null) return ResponseEntity.ok(image)
 
         val imageId = id.toLongOrNull() ?: return ResponseEntity.notFound().build()
 
         val dbImage = dbImageRepo.findByIdOrNull(imageId) ?: return ResponseEntity.notFound().build()
-        // TODO: check permission
+
+        if (!hasPermissionToView(dbImage, request)) {
+            return ResponseEntity.notFound().build()
+        }
+
         return imageStore.readImage(dbImage.storeId)?.let { ResponseEntity.ok(it) }
             ?: ResponseEntity.notFound().build()
     }
@@ -75,8 +95,9 @@ class GalleryApi(
 
         val dbUser = sessionManager.getCurrentUser(request) ?: return permissionDenied
         val dbImage = dbImageRepo.findByIdOrNull(id) ?: return notFound
-        // TODO: check permission of image
-        if (dbImage.uploader.id != dbUser.id) return permissionDenied
+
+        if (!hasPermissionToView(dbImage, request)) return notFound // 404 for private images
+        if (dbImage.uploader.id != dbUser.id) return permissionDenied // 403 for public images
 
         val storeId = dbImage.storeId
         dbImageRepo.delete(dbImage) // hard deletion. GDPR is happy
@@ -91,7 +112,15 @@ class GalleryApi(
 
     @GetMapping("images/list")
     fun listImages(): ListOfImages {
-        // TODO: check permission
-        return ListOfImages(images = dbImageRepo.findAll().map { it!!.toProto() })
+        return ListOfImages(
+            images = dbImageRepo.findAll()
+                .filter { it!!.permission == Image.Permission.PUBLIC }
+                .map { it!!.toProto() }
+        )
+    }
+
+    private fun hasPermissionToView(dbImage: DbImage, request: HttpServletRequest): Boolean {
+        return dbImage.permission == Image.Permission.PUBLIC ||
+            sessionManager.getCurrentUser(request)?.id == dbImage.uploader.id
     }
 }

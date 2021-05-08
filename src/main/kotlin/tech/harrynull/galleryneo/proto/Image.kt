@@ -184,9 +184,9 @@ class Image(
     PUBLIC(1),
 
     /**
-     * hidden from public gallery and only accessible by the uploader
+     * hidden from public gallery and only accessible by the uploader or direct link (SHA 256)
      */
-    PRIVATE(2);
+    HIDDEN(2);
 
     companion object {
       @JvmField
@@ -199,7 +199,7 @@ class Image(
       @JvmStatic
       fun fromValue(value: Int): Permission? = when (value) {
         1 -> PUBLIC
-        2 -> PRIVATE
+        2 -> HIDDEN
         else -> null
       }
     }

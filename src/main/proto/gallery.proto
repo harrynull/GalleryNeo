@@ -3,7 +3,7 @@ package tech.harrynull.galleryneo.proto;
 message Image {
   enum Permission {
     PUBLIC = 1;
-    PRIVATE = 2; // hidden from public gallery and only accessible by the uploader
+    HIDDEN = 2; // hidden from public gallery and only accessible by the uploader or direct link (SHA 256)
   }
 
   optional string description = 1;

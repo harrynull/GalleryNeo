@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
+import tech.harrynull.galleryneo.proto.Image
 import tech.harrynull.galleryneo.utils.ImageStore
 import tech.harrynull.galleryneo.utils.UserSession
 import tech.harrynull.galleryneo.utils.UserSessionFactory
@@ -111,13 +112,22 @@ class GalleryApiTests {
     }
 
     @Test
-    fun `private image is only accessible by its uploader`() {
-
+    fun `private image is only accessible by its uploader and anyone with direct url`() {
+        val image = user1.uploadImage("test".toByteArray(), "a test image", Image.Permission.HIDDEN).image!!
+        assertThat(user1.getImage(image.id!!.toString()).body).isEqualTo("test".toByteArray())
+        assertThat(user2.getImage(image.id!!.toString()).body).isNullOrEmpty()
+        // You can access the image if you know the SHA256. So they can link the image somewhere else.
+        assertThat(user2.getImage(image.storeId!!).body).isEqualTo("test".toByteArray())
+        assertThat(user2.getImageMetaInfo(image.id!!)).isNull()
+        assertThat(guest.getImage(image.id!!.toString()).body).isNullOrEmpty()
+        assertThat(guest.getImage(image.storeId!!).body).isEqualTo("test".toByteArray())
+        assertThat(guest.getImageMetaInfo(image.id!!)).isNull()
     }
 
     @Test
     fun `private image is not in the list`() {
-
+        user1.uploadImage("test".toByteArray(), "a test image", Image.Permission.HIDDEN).image!!
+        assertThat(user1.listImages().images).isEmpty()
     }
 
     @Test

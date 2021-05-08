@@ -7,6 +7,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.stereotype.Component
 import tech.harrynull.galleryneo.api.GalleryApi
 import tech.harrynull.galleryneo.api.UserApi
+import tech.harrynull.galleryneo.proto.Image
 import tech.harrynull.galleryneo.proto.RegisterRequest
 import tech.harrynull.galleryneo.proto.UploadResult
 import javax.servlet.http.Cookie
@@ -19,14 +20,18 @@ class UserSession(private val galleryApi: GalleryApi, private val cookies: Array
             return req
         }
 
-    fun uploadImage(content: ByteArray, description: String?): UploadResult {
+    fun uploadImage(
+        content: ByteArray,
+        description: String?,
+        permission: Image.Permission? = Image.Permission.PUBLIC
+    ): UploadResult {
         val image = MockMultipartFile("image", "image.jpg", MediaType.IMAGE_JPEG_VALUE, content)
-        return galleryApi.uploadImage(request, image, description)
+        return galleryApi.uploadImage(request, image, description, permission)
     }
 
-    fun getImage(id: String) = galleryApi.getImage(id)
+    fun getImage(id: String) = galleryApi.getImage(request, id)
 
-    fun getImageMetaInfo(id: Long) = galleryApi.getImageMetaInfo(id)
+    fun getImageMetaInfo(id: Long) = galleryApi.getImageMetaInfo(request, id)
 
     fun listImages() = galleryApi.listImages()
 

@@ -65,11 +65,6 @@ class UserApi(
         return LoginOrRegisterResponse(isSuccessful = true, user = dbUser.toProto())
     }
 
-    @GetMapping("/user/{name}/uploaded")
-    fun uploadedImages() {
-
-    }
-
     private fun failResponse(reason: String): LoginOrRegisterResponse {
         return LoginOrRegisterResponse(isSuccessful = false, failMessage = reason)
     }
