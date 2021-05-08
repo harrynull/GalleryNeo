@@ -1,1 +1,23 @@
 package tech.harrynull.galleryneo.proto;
+
+message User {
+  optional string name = 1;
+  optional string email = 2;
+}
+
+message LoginRequest {
+  optional string email = 1;
+  optional string password = 2;
+}
+
+message RegisterRequest {
+  optional string email = 1;
+  optional string name = 2;
+  optional string password = 3;
+}
+
+message LoginOrRegisterResponse {
+  optional bool isSuccessful = 1;
+  optional User user = 2;
+  optional string failMessage = 3;
+}

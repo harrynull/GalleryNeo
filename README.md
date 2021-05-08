@@ -6,14 +6,10 @@ Written with Kotlin, Springboot, MySQL, protobuf
 
 ## Deployment/Development
 
-### Manually
 You need to have an SQL database (tested with MySQL 8.0) installed and change the configuration in `application.properties`.
 Alternatively, change your environment variables `MYSQL_HOST`, `MYSQL_USERNAME`, `MYSQL_PASSWORD`, `MYSQL_DB`.
 
 Then, you can build it with `./gradlew build`
-
-### Docker
-TODO
 
 ## License
 
