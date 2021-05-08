@@ -13,7 +13,8 @@ It implements the following features:
    easy-to-maintain [code](https://github.com/harrynull/GalleryNeo/blob/master/src/main/kotlin/tech/harrynull/galleryneo/)
    .
 6. Comprehensive [tests](https://github.com/harrynull/GalleryNeo/blob/master/src/test/kotlin/tech/harrynull/galleryneo/)
-7. All written in one day (and no I didn't pull an all nighter for this)!
+7. A quick and dirty frontend so you don't have to use command lines to test its functionality.
+8. All written in one day (and no I didn't pull an all nighter)!
 
 What wasn't done because of time constraints (But I could have done it if needed):
 
@@ -33,11 +34,21 @@ in `application.properties`. Alternatively, change your environment variables `M
 , `MYSQL_PASSWORD`, `MYSQL_DB`. The default values are `localhost:3306/gallery` and `localhost:3306/gallery_test` with
 username and password as root
 
-Then, you can run it with `./gradlew bootRun` and it will start a server at `127.0.0.1:8080`
+Then, you can run it with `./gradlew bootRun` and it will start a server
+at [http://localhost:8080](http://localhost:8080)
 
 You can also run the tests with `./gradlew test`
 
-If you somehow really wants to use it in production, it is recommended to put it behind nginx and use the compiled jar instead.
+If you somehow really wants to use it in production, it is recommended to put it behind nginx and use the compiled jar
+instead.
+
+### Frontend
+
+To run the frontend, run `cd frontend/ && npm install && npm run start` (or `yarn` if you prefer so)
+
+Make sure it's running on [http://localhost:3000](http://localhost:3000) or CORS won't be working.
+
+Spoiler: the code for FE is hacky and dirty but, hey, it works.
 
 ## License
 
