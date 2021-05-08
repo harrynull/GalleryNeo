@@ -14,7 +14,6 @@ import tech.harrynull.galleryneo.proto.UploadResult
 import tech.harrynull.galleryneo.utils.ImageStore
 import tech.harrynull.galleryneo.utils.SessionManager
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @RestController
 class GalleryApi(
@@ -116,6 +115,17 @@ class GalleryApi(
             images = dbImageRepo.findAll()
                 .filter { it!!.permission == Image.Permission.PUBLIC }
                 .map { it!!.toProto() }
+        )
+    }
+
+    @GetMapping("images/by/{user}")
+    fun getAllImagesUploadedBy(request: HttpServletRequest, @PathVariable user: String): ListOfImages {
+        // user's name is unique, so checking the name is sufficient to determine permission.
+        val shouldShowHiddenImages = sessionManager.getCurrentUser(request)?.name == user
+        return ListOfImages(
+            images = dbImageRepo.findAllByUploader_Name(user)
+                .filter { it.permission == Image.Permission.PUBLIC || shouldShowHiddenImages }
+                .map { it.toProto() }
         )
     }
 

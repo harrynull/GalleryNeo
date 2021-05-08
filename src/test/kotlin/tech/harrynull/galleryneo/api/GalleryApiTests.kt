@@ -21,6 +21,7 @@ import javax.transaction.Transactional
 class GalleryApiTests {
     @Autowired
     private lateinit var userSessionFactory: UserSessionFactory
+
     @Autowired
     private lateinit var imageStore: ImageStore
 
@@ -138,5 +139,22 @@ class GalleryApiTests {
         assertThat(guest.deleteImage(image.id!!).statusCode).isEqualTo(HttpStatus.FORBIDDEN)
         // image is still accessible
         assertThat(guest.getImage(image.id!!.toString()).body!!).isEqualTo("test".toByteArray())
+    }
+
+    @Test
+    fun `view uploaded images by someone`() {
+        val imagePublic = user1.uploadImage("test".toByteArray(), null, Image.Permission.PUBLIC).image!!
+        val imageHidden = user1.uploadImage("test".toByteArray(), null, Image.Permission.HIDDEN).image!!
+        // images uploaded by user 2 will not be shown in the user 1's uploaded image list
+        user2.uploadImage("test".toByteArray(), null, Image.Permission.PUBLIC).image!!
+
+        assertThat(user1.getAllImagesUploadedBy("user1").images.map { it.id })
+            .containsExactlyInAnyOrder(imagePublic.id, imageHidden.id)
+
+        // if user 2/guest views user 1's uploaded images, they can only see the public ones.
+        assertThat(user2.getAllImagesUploadedBy("user1").images.map { it.id })
+            .containsExactlyInAnyOrder(imagePublic.id)
+        assertThat(guest.getAllImagesUploadedBy("user1").images.map { it.id })
+            .containsExactlyInAnyOrder(imagePublic.id)
     }
 }

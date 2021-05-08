@@ -35,6 +35,8 @@ class UserSession(private val galleryApi: GalleryApi, private val cookies: Array
 
     fun listImages() = galleryApi.listImages()
 
+    fun getAllImagesUploadedBy(name: String) = galleryApi.getAllImagesUploadedBy(request, name)
+
     fun deleteImage(id: Long) = galleryApi.deleteImage(request, id)
 }
 
