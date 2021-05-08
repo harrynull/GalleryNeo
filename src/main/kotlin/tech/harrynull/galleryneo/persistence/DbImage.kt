@@ -8,6 +8,7 @@ import javax.persistence.*
 @Table(
     name = "images", indexes = [
     Index(name = "idx_imageId", columnList = "imageId"),
+    Index(name = "idx_storeId", columnList = "storeId"),
     Index(name = "idx_uploader", columnList = "uploader_id"),
 ]
 )
@@ -16,7 +17,7 @@ data class DbImage(
     var description: String,
 
     @Column
-    var imageId: String, // hash of the image
+    var storeId: String, // hash of the image
 
     @Column
     var timeUploadedMillis: Long,
@@ -30,7 +31,8 @@ data class DbImage(
     fun toProto(): Image {
         return Image(
             description = description,
-            id = imageId,
+            storeId = storeId,
+            id = id,
             uploaderName = uploader.name,
             timeUploadedMillis = timeUploadedMillis,
         )
@@ -47,7 +49,7 @@ data class DbImage(
             return DbImage(
                 uploader = uploader,
                 description = description ?: "",
-                imageId = imageStore.storeImage(content),
+                storeId = imageStore.storeImage(content),
                 timeUploadedMillis = System.currentTimeMillis(),
             )
         }

@@ -3,7 +3,6 @@ package tech.harrynull.galleryneo.utils
 import org.bouncycastle.util.encoders.Hex
 import org.springframework.stereotype.Component
 import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.nio.file.Path
 import java.security.MessageDigest
 
@@ -37,9 +36,10 @@ class LocalImageStore : ImageStore {
         return hash
     }
 
-    override fun readImage(id: String): ByteArray? {
-        if (idRegexPattern.matchEntire(id) == null) return null
+    override fun readImage(storeId: String): ByteArray? {
+        if (idRegexPattern.matchEntire(storeId) == null) return null
 
-        return kotlin.runCatching { FileInputStream(imageStorePath.resolve(id).toFile()).readAllBytes() }.getOrNull()
+        return kotlin.runCatching { FileInputStream(imageStorePath.resolve(storeId).toFile()).readAllBytes() }
+            .getOrNull()
     }
 }

@@ -1,11 +1,14 @@
 package tech.harrynull.galleryneo.api
 
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import tech.harrynull.galleryneo.persistence.DbImage
 import tech.harrynull.galleryneo.persistence.DbImageRepo
 import tech.harrynull.galleryneo.proto.Image
+import tech.harrynull.galleryneo.proto.ListOfImages
 import tech.harrynull.galleryneo.proto.UploadResult
 import tech.harrynull.galleryneo.utils.ImageStore
 import tech.harrynull.galleryneo.utils.SessionManager
@@ -40,8 +43,9 @@ class GalleryApi(
     }
 
     @GetMapping("images/meta/{id}")
-    fun getImageMetaInfo(@PathVariable id: String): Image? {
-        return dbImageRepo.findByImageId(id)?.toProto()
+    fun getImageMetaInfo(@PathVariable id: Long): Image? {
+        // TODO: check permission
+        return dbImageRepo.findByIdOrNull(id)?.toProto()
     }
 
     @GetMapping("images/{id}", produces = [
@@ -49,8 +53,17 @@ class GalleryApi(
         MediaType.IMAGE_GIF_VALUE,
         MediaType.IMAGE_PNG_VALUE
     ])
-    fun getImage(@PathVariable id: String, response: HttpServletResponse): ByteArray? {
-        return imageStore.readImage(id)
+    fun getImage(@PathVariable id: String, response: HttpServletResponse): ResponseEntity<ByteArray> {
+        // try to interpret it as SHA 256 (store id) first.
+        val image = imageStore.readImage(id)
+        if (image != null) return ResponseEntity.ok(image)
+
+        val imageId = id.toLongOrNull() ?: return ResponseEntity.notFound().build()
+
+        val dbImage = dbImageRepo.findByIdOrNull(imageId) ?: return ResponseEntity.notFound().build()
+        // TODO: check permission
+        return imageStore.readImage(dbImage.storeId)?.let { ResponseEntity.ok(it) }
+            ?: ResponseEntity.notFound().build()
     }
 
     @DeleteMapping("images/{id}")
@@ -59,7 +72,8 @@ class GalleryApi(
     }
 
     @GetMapping("images/list")
-    fun listImages() {
-        
+    fun listImages(): ListOfImages {
+        // TODO: check permission
+        return ListOfImages(images = dbImageRepo.findAll().map { it.toProto() })
     }
 }
