@@ -3,18 +3,17 @@ package tech.harrynull.galleryneo.utils
 import org.bouncycastle.util.encoders.Hex
 import org.springframework.stereotype.Component
 import java.io.FileInputStream
-import java.nio.file.Path
+import java.nio.file.Paths
 import java.security.MessageDigest
-import kotlin.io.path.deleteExisting
-
-// Well this should have been in a config file/env.
-// But really, in prod, it should be a CDN/file storage service (e.g. Amazon S3)
-private val imageStorePath = Path.of("images/")
 
 private val idRegexPattern = "[A-Fa-f0-9]{64}".toRegex()
 
 @Component
 class LocalImageStore : ImageStore {
+    // Well this should have been in a config file/env.
+    // But really, in prod, it should be a CDN/file storage service (e.g. Amazon S3)
+    private val imageStorePath = Paths.get("images")
+
     // return image name - hash of the image
     override fun storeImage(content: ByteArray): String {
         // digest is not thread-safe so create a new instance every time
@@ -41,7 +40,7 @@ class LocalImageStore : ImageStore {
         if (idRegexPattern.matchEntire(storeId) == null) return null
 
         return kotlin.runCatching {
-            FileInputStream(imageStorePath.resolve(storeId).toFile()).use { it.readAllBytes() }
+            FileInputStream(imageStorePath.resolve(storeId).toFile()).use { it.readBytes() }
         }.getOrNull()
     }
 

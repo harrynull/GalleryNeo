@@ -17,7 +17,7 @@ It implements the following features:
 
 What wasn't done because of time constraints (But I could have done it if needed):
 
-1. Cache with Redisx
+1. Cache with Redis.
 2. Admin permissions.
 3. Pagination
 4. Checking if the uploaded file has proper image header (so users don't abuse it as a cloud drive)
@@ -30,9 +30,14 @@ Written with Kotlin, Springboot, MySQL, protobuf
 
 You need to have an SQL database (tested with MySQL 8.0) installed and change the configuration
 in `application.properties`. Alternatively, change your environment variables `MYSQL_HOST`, `MYSQL_USERNAME`
-, `MYSQL_PASSWORD`, `MYSQL_DB`.
+, `MYSQL_PASSWORD`, `MYSQL_DB`. The default values are `localhost:3306/gallery` and `localhost:3306/gallery_test` with
+username and password as root
 
-Then, you can build it with `./gradlew build`
+Then, you can run it with `./gradlew bootRun` and it will start a server at `127.0.0.1:8080`
+
+You can also run the tests with `./gradlew test`
+
+If you somehow really wants to use it in production, it is recommended to put it behind nginx and use the compiled jar instead.
 
 ## License
 
