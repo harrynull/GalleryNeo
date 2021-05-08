@@ -1,11 +1,17 @@
 package tech.harrynull.galleryneo.proto;
 
 message Image {
+  enum Permission {
+    PUBLIC = 1;
+    PRIVATE = 2; // hidden from public gallery and only accessible by the uploader
+  }
+
   optional string description = 1;
   optional string uploaderName = 2;
   optional string storeId = 3;
   optional uint64 timeUploadedMillis = 4;
   optional uint64 id = 5;
+  optional Permission permission = 6;
 }
 
 message UploadResult {

@@ -42,4 +42,13 @@ class LocalImageStore : ImageStore {
         return kotlin.runCatching { FileInputStream(imageStorePath.resolve(storeId).toFile()).readAllBytes() }
             .getOrNull()
     }
+
+    override fun deleteImage(storeId: String) {
+        if (idRegexPattern.matchEntire(storeId) == null) throw ImageNotFoundException()
+
+        val file = imageStorePath.resolve(storeId).toFile()
+        if (!file.exists()) throw ImageNotFoundException()
+
+        file.delete()
+    }
 }

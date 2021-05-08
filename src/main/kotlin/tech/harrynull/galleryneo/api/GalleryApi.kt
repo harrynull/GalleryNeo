@@ -1,6 +1,7 @@
 package tech.harrynull.galleryneo.api
 
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -48,6 +49,7 @@ class GalleryApi(
         return dbImageRepo.findByIdOrNull(id)?.toProto()
     }
 
+    // it can use both store id (SHA 256) or image id (primary key)
     @GetMapping("images/{id}", produces = [
         MediaType.IMAGE_JPEG_VALUE,
         MediaType.IMAGE_GIF_VALUE,
@@ -67,13 +69,29 @@ class GalleryApi(
     }
 
     @DeleteMapping("images/{id}")
-    fun deleteImage(@PathVariable id: String) {
-        // TODO
+    fun deleteImage(request: HttpServletRequest, @PathVariable id: Long): ResponseEntity<Boolean> {
+        val permissionDenied = ResponseEntity.status(HttpStatus.FORBIDDEN).build<Boolean>()
+        val notFound = ResponseEntity.notFound().build<Boolean>()
+
+        val dbUser = sessionManager.getCurrentUser(request) ?: return permissionDenied
+        val dbImage = dbImageRepo.findByIdOrNull(id) ?: return notFound
+        // TODO: check permission of image
+        if (dbImage.uploader.id != dbUser.id) return permissionDenied
+
+        val storeId = dbImage.storeId
+        dbImageRepo.delete(dbImage) // hard deletion. GDPR is happy
+
+        // free some disk space if no one else is referring to this image
+        // can be further optimized by maintaining a ref counter.
+        if (!dbImageRepo.existsByStoreId(storeId)) {
+            imageStore.deleteImage(dbImage.storeId)
+        }
+        return ResponseEntity.ok(true)
     }
 
     @GetMapping("images/list")
     fun listImages(): ListOfImages {
         // TODO: check permission
-        return ListOfImages(images = dbImageRepo.findAll().map { it.toProto() })
+        return ListOfImages(images = dbImageRepo.findAll().map { it!!.toProto() })
     }
 }

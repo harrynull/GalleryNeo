@@ -2,11 +2,13 @@
 // Source file: gallery.proto
 package tech.harrynull.galleryneo.proto
 
+import com.squareup.wire.EnumAdapter
 import com.squareup.wire.FieldEncoding
 import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.ProtoReader
 import com.squareup.wire.ProtoWriter
+import com.squareup.wire.WireEnum
 import com.squareup.wire.WireField
 import com.squareup.wire.internal.sanitize
 import kotlin.Any
@@ -20,6 +22,7 @@ import kotlin.Nothing
 import kotlin.String
 import kotlin.hashCode
 import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
 import okio.ByteString
 
 class Image(
@@ -48,6 +51,11 @@ class Image(
     adapter = "com.squareup.wire.ProtoAdapter#UINT64"
   )
   val id: Long? = null,
+  @field:WireField(
+    tag = 6,
+    adapter = "tech.harrynull.galleryneo.proto.Image${'$'}Permission#ADAPTER"
+  )
+  val permission: Permission? = null,
   unknownFields: ByteString = ByteString.EMPTY
 ) : Message<Image, Nothing>(ADAPTER, unknownFields) {
   @Deprecated(
@@ -65,6 +73,7 @@ class Image(
         && storeId == other.storeId
         && timeUploadedMillis == other.timeUploadedMillis
         && id == other.id
+        && permission == other.permission
   }
 
   override fun hashCode(): Int {
@@ -76,6 +85,7 @@ class Image(
       result = result * 37 + storeId.hashCode()
       result = result * 37 + timeUploadedMillis.hashCode()
       result = result * 37 + id.hashCode()
+      result = result * 37 + permission.hashCode()
       super.hashCode = result
     }
     return result
@@ -88,6 +98,7 @@ class Image(
     if (storeId != null) result += """storeId=${sanitize(storeId)}"""
     if (timeUploadedMillis != null) result += """timeUploadedMillis=$timeUploadedMillis"""
     if (id != null) result += """id=$id"""
+    if (permission != null) result += """permission=$permission"""
     return result.joinToString(prefix = "Image{", separator = ", ", postfix = "}")
   }
 
@@ -97,8 +108,10 @@ class Image(
     storeId: String? = this.storeId,
     timeUploadedMillis: Long? = this.timeUploadedMillis,
     id: Long? = this.id,
+    permission: Permission? = this.permission,
     unknownFields: ByteString = this.unknownFields
-  ): Image = Image(description, uploaderName, storeId, timeUploadedMillis, id, unknownFields)
+  ): Image = Image(description, uploaderName, storeId, timeUploadedMillis, id, permission,
+      unknownFields)
 
   companion object {
     @JvmField
@@ -113,6 +126,7 @@ class Image(
         ProtoAdapter.STRING.encodedSizeWithTag(3, value.storeId) +
         ProtoAdapter.UINT64.encodedSizeWithTag(4, value.timeUploadedMillis) +
         ProtoAdapter.UINT64.encodedSizeWithTag(5, value.id) +
+        Permission.ADAPTER.encodedSizeWithTag(6, value.permission) +
         value.unknownFields.size
 
       override fun encode(writer: ProtoWriter, value: Image) {
@@ -121,6 +135,7 @@ class Image(
         ProtoAdapter.STRING.encodeWithTag(writer, 3, value.storeId)
         ProtoAdapter.UINT64.encodeWithTag(writer, 4, value.timeUploadedMillis)
         ProtoAdapter.UINT64.encodeWithTag(writer, 5, value.id)
+        Permission.ADAPTER.encodeWithTag(writer, 6, value.permission)
         writer.writeBytes(value.unknownFields)
       }
 
@@ -130,6 +145,7 @@ class Image(
         var storeId: String? = null
         var timeUploadedMillis: Long? = null
         var id: Long? = null
+        var permission: Permission? = null
         val unknownFields = reader.forEachTag { tag ->
           when (tag) {
             1 -> description = ProtoAdapter.STRING.decode(reader)
@@ -137,6 +153,11 @@ class Image(
             3 -> storeId = ProtoAdapter.STRING.decode(reader)
             4 -> timeUploadedMillis = ProtoAdapter.UINT64.decode(reader)
             5 -> id = ProtoAdapter.UINT64.decode(reader)
+            6 -> try {
+              permission = Permission.ADAPTER.decode(reader)
+            } catch (e: ProtoAdapter.EnumConstantNotFoundException) {
+              reader.addUnknownField(tag, FieldEncoding.VARINT, e.value.toLong())
+            }
             else -> reader.readUnknownField(tag)
           }
         }
@@ -146,6 +167,7 @@ class Image(
           storeId = storeId,
           timeUploadedMillis = timeUploadedMillis,
           id = id,
+          permission = permission,
           unknownFields = unknownFields
         )
       }
@@ -153,6 +175,33 @@ class Image(
       override fun redact(value: Image): Image = value.copy(
         unknownFields = ByteString.EMPTY
       )
+    }
+  }
+
+  enum class Permission(
+    override val value: Int
+  ) : WireEnum {
+    PUBLIC(1),
+
+    /**
+     * hidden from public gallery and only accessible by the uploader
+     */
+    PRIVATE(2);
+
+    companion object {
+      @JvmField
+      val ADAPTER: ProtoAdapter<Permission> = object : EnumAdapter<Permission>(
+        Permission::class
+      ) {
+        override fun fromValue(value: Int): Permission? = Permission.fromValue(value)
+      }
+
+      @JvmStatic
+      fun fromValue(value: Int): Permission? = when (value) {
+        1 -> PUBLIC
+        2 -> PRIVATE
+        else -> null
+      }
     }
   }
 }
