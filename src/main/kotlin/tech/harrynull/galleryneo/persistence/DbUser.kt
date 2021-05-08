@@ -7,7 +7,6 @@ import javax.persistence.*
 @Table(
     name = "users", indexes = [
     Index(name = "idx_name", columnList = "name", unique = true),
-    Index(name = "idx_email", columnList = "email", unique = true),
 ]
 )
 data class DbUser(

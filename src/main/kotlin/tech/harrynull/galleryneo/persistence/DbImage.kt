@@ -7,7 +7,6 @@ import javax.persistence.*
 @Entity(name = "image")
 @Table(
     name = "images", indexes = [
-    Index(name = "idx_imageId", columnList = "imageId"),
     Index(name = "idx_storeId", columnList = "storeId"),
     Index(name = "idx_uploader", columnList = "uploader_id"),
 ]

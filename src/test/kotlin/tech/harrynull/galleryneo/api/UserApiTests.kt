@@ -25,17 +25,13 @@ class UserApiTests {
 
         val result = userApi.register(
             RegisterRequest(
-                email = "test@example.com",
                 name = "Joe",
                 password = "very_secure_password"
             ), resp
         )
         assertThat(result.isSuccessful).isEqualTo(true)
 
-        with(result.user!!) {
-            assertThat(name).isEqualTo("Joe")
-            assertThat(email).isEqualTo("test@example.com")
-        }
+        assertThat(result.user!!.name).isEqualTo("Joe")
         assertThat(resp.cookies[0].name).isEqualTo("session")
         val sessionValue = resp.cookies[0].value
         assertThat(sessionValue).isNotEmpty()
@@ -46,7 +42,7 @@ class UserApiTests {
         assertThat(
             userApi.login(
                 LoginRequest(
-                    email = "test@example.com",
+                    name = "Joe",
                     password = "very_secure_password_but_wrong"
                 ), resp2
             ).failMessage
@@ -55,26 +51,22 @@ class UserApiTests {
 
         val result2 = userApi.login(
             LoginRequest(
-                email = "test@example.com",
+                name = "Joe",
                 password = "very_secure_password"
             ), resp2
         )
         assertThat(result2.isSuccessful).isTrue()
-        with(result2.user!!) {
-            assertThat(name).isEqualTo("Joe")
-            assertThat(email).isEqualTo("test@example.com")
-        }
+        assertThat(result2.user!!.name).isEqualTo("Joe")
         val newSessionId = resp2.cookies.single { it.name == "session" }.value
         assertThat(newSessionId).isNotEmpty()
         assertThat(newSessionId).isNotEqualTo(sessionValue)
     }
 
     @Test
-    fun `cannot login into non-existent user`() {
+    fun `cannot create accounts with the same name`() {
         assertThat(
             userApi.register(
                 RegisterRequest(
-                    email = "test@example.com",
                     name = "Joe",
                     password = "very_secure_password"
                 ), MockHttpServletResponse()
@@ -84,53 +76,40 @@ class UserApiTests {
         assertThat(
             userApi.register(
                 RegisterRequest(
-                    email = "test@example.com",
                     name = "Joe",
                     password = "very_secure_password"
                 ), MockHttpServletResponse()
             ).failMessage
-        ).isEqualTo("Email address already exists")
+        ).isEqualTo("Name is already taken")
     }
 
     @Test
-    fun `cannot create two accounts with the same email`() {
+    fun `cannot log into non existent account`() {
         val resp = MockHttpServletResponse()
         assertThat(
             userApi.login(
                 LoginRequest(
-                    email = "random@example.com",
+                    name = "random",
                     password = "very_secure_password"
                 ), resp
             ).isSuccessful
-        ).isFalse() // email not exist
+        ).isFalse() // name not exist
         assertThat(resp.cookies).isEmpty()
     }
 
     @Test
     fun `registering needs all mandatory fields`() {
-        // Send an empty request - will fail beacuse of missing mandatory fields
+        // Send an empty request - will fail because of missing mandatory fields
         with(userApi.register(RegisterRequest(), MockHttpServletResponse())) {
             assertThat(isSuccessful).isFalse()
             assertThat(user).isNull()
-            assertThat(failMessage).isEqualTo("Email not provided")
+            assertThat(failMessage).isEqualTo("Name not provided")
         }
 
-        with(userApi.register(RegisterRequest(email = "bad_email"), MockHttpServletResponse())) {
-            assertThat(isSuccessful).isFalse()
-            assertThat(user).isNull()
-            assertThat(failMessage).isEqualTo("Email address not valid")
-        }
-
-        with(userApi.register(RegisterRequest(email = "ok@ex.com"), MockHttpServletResponse())) {
+        with(userApi.register(RegisterRequest(name = "hi"), MockHttpServletResponse())) {
             assertThat(isSuccessful).isFalse()
             assertThat(user).isNull()
             assertThat(failMessage).isEqualTo("Password not provided")
-        }
-
-        with(userApi.register(RegisterRequest(email = "ok@ex.com", password = "Joe"), MockHttpServletResponse())) {
-            assertThat(isSuccessful).isFalse()
-            assertThat(user).isNull()
-            assertThat(failMessage).isEqualTo("Name not provided")
         }
     }
 }
